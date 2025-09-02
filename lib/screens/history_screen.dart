@@ -491,7 +491,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          ...reports.map((report) => _buildReportCard(report)).toList(),
+          ...reports.map((report) => _buildReportCard(report)),
         ] else ...[
           // Show a placeholder when no reports exist
           const SizedBox(height: 8),
@@ -793,8 +793,8 @@ class _ReportDialogState extends State<_ReportDialog> {
   final _descriptionController = TextEditingController();
 
   // File attachments
-  List<PlatformFile> _attachedFiles = [];
-  List<PlatformFile> _completionFiles = [];
+  final List<PlatformFile> _attachedFiles = [];
+  final List<PlatformFile> _completionFiles = [];
 
   // Flag to track if file picker is ready
   bool _isFilePickerReady = false;

@@ -608,7 +608,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 Text(
-                                  'File ${index}',
+                                  'File $index',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -635,7 +635,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
               ],
             ),
           ),
@@ -740,7 +740,7 @@ class _CreateConcessionaireDialogState
   final List<Map<String, TextEditingController>> _locationControllers = [];
 
   // File attachments
-  List<PlatformFile> _attachedFiles = [];
+  final List<PlatformFile> _attachedFiles = [];
 
   // Flag to track if file picker is ready
   bool _isFilePickerReady = false;

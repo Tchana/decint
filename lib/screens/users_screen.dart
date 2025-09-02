@@ -716,7 +716,7 @@ class _UserDialogState extends State<_UserDialog> {
 
                 // Profile Type dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedProfileType,
+                  initialValue: _selectedProfileType,
                   decoration: const InputDecoration(
                     labelText: 'Profile Type *',
                     border: OutlineInputBorder(),
@@ -746,7 +746,7 @@ class _UserDialogState extends State<_UserDialog> {
 
                 // Status dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedStatus,
+                  initialValue: _selectedStatus,
                   decoration: const InputDecoration(
                     labelText: 'Status *',
                     border: OutlineInputBorder(),

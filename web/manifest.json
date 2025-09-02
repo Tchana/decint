@@ -1,13 +1,17 @@
 {
-    "name": "decint",
-    "short_name": "decint",
+    "name": "DECINT - Admin Panel",
+    "short_name": "DECINT",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#667eea",
+    "theme_color": "#667eea",
+    "description": "DECINT Flutter Admin Panel for Intervention Management - Works Offline",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "offline_enabled": true,
+    "categories": ["productivity", "business"],
+    "lang": "en",
+    "scope": "/",
     "icons": [
         {
             "src": "icons/Icon-192.png",

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'users_screen.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -44,6 +45,81 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
+  // Get sample users data for intervener selection
+  final List<Map<String, dynamic>> _users = [
+    {
+      'id': 'USR-001',
+      'name': 'Jean Dupont',
+      'email': 'jean.dupont@admin.com',
+      'profileType': 'Admin',
+      'status': 'Active',
+    },
+    {
+      'id': 'USR-002',
+      'name': 'Marie Martin',
+      'email': 'marie.martin@maitredouvrage.com',
+      'profileType': 'Maitre d\'ouvrage',
+      'status': 'Active',
+    },
+    {
+      'id': 'USR-003',
+      'name': 'Pierre Bernard',
+      'email': 'pierre.bernard@concessionaire.com',
+      'profileType': 'Concessionaire',
+      'status': 'Active',
+    },
+    {
+      'id': 'USR-004',
+      'name': 'Sophie Leroy',
+      'email': 'sophie.leroy@ctd.com',
+      'profileType': 'CTD',
+      'status': 'Active',
+    },
+    {
+      'id': 'USR-005',
+      'name': 'Michel Dubois',
+      'email': 'michel.dubois@bet.com',
+      'profileType': 'BET',
+      'status': 'Active',
+    },
+    {
+      'id': 'USR-006',
+      'name': 'Isabelle Moreau',
+      'email': 'isabelle.moreau@entreprise.com',
+      'profileType': 'Entreprise de travaux',
+      'status': 'Active',
+    },
+    {
+      'id': 'USR-007',
+      'name': 'Laurent Petit',
+      'email': 'laurent.petit@lecteur.com',
+      'profileType': 'Lecteur',
+      'status': 'Inactive',
+    },
+  ];
+
+  // Get active users for intervener selection
+  List<Map<String, dynamic>> get _activeUsers =>
+      _users.where((user) => user['status'] == 'Active').toList();
+
+  // Helper method to get user names from user IDs
+  String _getIntervenerNames(List<dynamic>? intervenerIds) {
+    if (intervenerIds == null || intervenerIds.isEmpty) {
+      return 'None';
+    }
+
+    final names = intervenerIds
+        .map(
+          (id) => _users.firstWhere(
+            (user) => user['id'] == id,
+            orElse: () => {'name': 'Unknown'},
+          )['name'],
+        )
+        .toList();
+
+    return names.join(', ');
+  }
+
   // Sample data for interventions
   final List<Map<String, dynamic>> _interventions = [
     {
@@ -54,6 +130,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       'startDate': '2025-01-15',
       'endDate': '2025-01-25',
       'status': 'en cours',
+      'interveners': ['USR-001', 'USR-004'], // User IDs
     },
     {
       'id': 'INT-002',
@@ -63,6 +140,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       'startDate': '2025-01-10',
       'endDate': '2025-01-15',
       'status': 'terminée',
+      'interveners': ['USR-002'],
     },
     {
       'id': 'INT-003',
@@ -72,6 +150,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       'startDate': '2025-01-20',
       'endDate': '2025-01-30',
       'status': 'en pause',
+      'interveners': ['USR-003', 'USR-005'],
     },
   ];
 
@@ -252,6 +331,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               ),
                             ),
                             Expanded(
+                              flex: 2,
+                              child: Text(
+                                'Interveners',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Expanded(
                               flex: 1,
                               child: Text(
                                 'Actions',
@@ -332,6 +418,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      _getIntervenerNames(
+                                        intervention['interveners'],
+                                      ),
+                                      style: const TextStyle(fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   Expanded(
@@ -457,6 +553,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       context: context,
       builder: (BuildContext context) {
         return _CreateInterventionDialog(
+          activeUsers: _activeUsers,
           onInterventionCreated: (intervention) {
             // Check for conflicts before adding
             final conflict = _checkInterventionConflict(
@@ -519,6 +616,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       builder: (BuildContext context) {
         return _EditInterventionDialog(
           intervention: intervention,
+          activeUsers: _activeUsers,
           onInterventionUpdated: (updatedIntervention) {
             // Check for conflicts before updating
             final conflict = _checkInterventionConflict(
@@ -654,9 +752,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 }
 
 class _CreateInterventionDialog extends StatefulWidget {
+  final List<Map<String, dynamic>> activeUsers;
   final Function(Map<String, dynamic>) onInterventionCreated;
 
-  const _CreateInterventionDialog({required this.onInterventionCreated});
+  const _CreateInterventionDialog({
+    required this.activeUsers,
+    required this.onInterventionCreated,
+  });
 
   @override
   State<_CreateInterventionDialog> createState() =>
@@ -671,6 +773,7 @@ class _CreateInterventionDialogState extends State<_CreateInterventionDialog> {
   final _startDateController = TextEditingController();
   final _endDateController = TextEditingController();
   String _selectedStatus = 'en cours';
+  List<String> _selectedInterveners = []; // Selected user IDs
 
   final List<String> _statusOptions = ['en cours', 'en pause', 'terminée'];
 
@@ -842,7 +945,7 @@ class _CreateInterventionDialogState extends State<_CreateInterventionDialog> {
 
                 // Status dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedStatus,
+                  initialValue: _selectedStatus,
                   decoration: const InputDecoration(
                     labelText: 'Status *',
                     border: OutlineInputBorder(),
@@ -867,6 +970,95 @@ class _CreateInterventionDialogState extends State<_CreateInterventionDialog> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+
+                // Interveners selection
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Interveners',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF2D3748),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      constraints: const BoxConstraints(minHeight: 120),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.grey[50],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Select users to assign to this intervention:',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 8),
+                          ...widget.activeUsers.map((user) {
+                            final isSelected = _selectedInterveners.contains(
+                              user['id'],
+                            );
+                            return CheckboxListTile(
+                              title: Text(
+                                user['name'],
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              subtitle: Text(
+                                '${user['profileType']} - ${user['email']}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              value: isSelected,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    _selectedInterveners.add(user['id']);
+                                  } else {
+                                    _selectedInterveners.remove(user['id']);
+                                  }
+                                });
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                              dense: true,
+                            );
+                          }).toList(),
+                          if (_selectedInterveners.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    size: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'No interveners selected',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -905,6 +1097,7 @@ class _CreateInterventionDialogState extends State<_CreateInterventionDialog> {
         'startDate': _startDateController.text.trim(),
         'endDate': _endDateController.text.trim(),
         'status': _selectedStatus,
+        'interveners': _selectedInterveners, // Add selected interveners
       };
 
       // Call the callback function
@@ -928,10 +1121,12 @@ class _CreateInterventionDialogState extends State<_CreateInterventionDialog> {
 
 class _EditInterventionDialog extends StatefulWidget {
   final Map<String, dynamic> intervention;
+  final List<Map<String, dynamic>> activeUsers;
   final Function(Map<String, dynamic>) onInterventionUpdated;
 
   const _EditInterventionDialog({
     required this.intervention,
+    required this.activeUsers,
     required this.onInterventionUpdated,
   });
 
@@ -948,6 +1143,7 @@ class _EditInterventionDialogState extends State<_EditInterventionDialog> {
   late final TextEditingController _startDateController;
   late final TextEditingController _endDateController;
   late String _selectedStatus;
+  late List<String> _selectedInterveners; // Selected user IDs
 
   final List<String> _statusOptions = ['en cours', 'en pause', 'terminée'];
 
@@ -969,6 +1165,10 @@ class _EditInterventionDialogState extends State<_EditInterventionDialog> {
       text: widget.intervention['endDate'],
     );
     _selectedStatus = widget.intervention['status'];
+    // Initialize selected interveners from existing data
+    _selectedInterveners = widget.intervention['interveners'] != null
+        ? List<String>.from(widget.intervention['interveners'])
+        : [];
   }
 
   @override
@@ -1139,7 +1339,7 @@ class _EditInterventionDialogState extends State<_EditInterventionDialog> {
 
                 // Status dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedStatus,
+                  initialValue: _selectedStatus,
                   decoration: const InputDecoration(
                     labelText: 'Status *',
                     border: OutlineInputBorder(),
@@ -1164,6 +1364,95 @@ class _EditInterventionDialogState extends State<_EditInterventionDialog> {
                     }
                     return null;
                   },
+                ),
+                const SizedBox(height: 16),
+
+                // Interveners selection
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Interveners',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF2D3748),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      constraints: const BoxConstraints(minHeight: 120),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.grey[50],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Select users to assign to this intervention:',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 8),
+                          ...widget.activeUsers.map((user) {
+                            final isSelected = _selectedInterveners.contains(
+                              user['id'],
+                            );
+                            return CheckboxListTile(
+                              title: Text(
+                                user['name'],
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              subtitle: Text(
+                                '${user['profileType']} - ${user['email']}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              value: isSelected,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    _selectedInterveners.add(user['id']);
+                                  } else {
+                                    _selectedInterveners.remove(user['id']);
+                                  }
+                                });
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                              dense: true,
+                            );
+                          }).toList(),
+                          if (_selectedInterveners.isEmpty)
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    size: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'No interveners selected',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1198,6 +1487,7 @@ class _EditInterventionDialogState extends State<_EditInterventionDialog> {
         'startDate': _startDateController.text.trim(),
         'endDate': _endDateController.text.trim(),
         'status': _selectedStatus,
+        'interveners': _selectedInterveners, // Add selected interveners
       };
 
       // Call the callback function

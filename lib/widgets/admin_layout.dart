@@ -125,12 +125,12 @@ class _AdminLayoutState extends State<AdminLayout> {
                               ),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? Colors.white.withOpacity(0.15)
+                                    ? Colors.white.withValues(alpha: 0.15)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(12),
                                 border: isSelected
                                     ? Border.all(
-                                        color: Colors.white.withOpacity(0.3),
+                                        color: Colors.white.withValues(alpha: 0.3),
                                       )
                                     : null,
                               ),
